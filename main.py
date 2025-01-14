@@ -302,11 +302,14 @@ def main():
 
         else:  
             st.sidebar.write("No previously uploaded files found.")  
-    # Load the selected files  
-    if selected_file_1:  
+            
+    if 'select_actual' in st.session_state and st.session_state.select_actual:  
+        selected_file_1 = st.session_state.select_actual  
         st.session_state.uploaded_file_1 = os.path.join(UPLOAD_DIR, selected_file_1)  
-    if selected_file_2:  
-        st.session_state.uploaded_file_2 = os.path.join(UPLOAD_DIR, selected_file_2)   
+  
+    if 'select_estimated' in st.session_state and st.session_state.select_estimated:  
+        selected_file_2 = st.session_state.select_estimated  
+        st.session_state.uploaded_file_2 = os.path.join(UPLOAD_DIR, selected_file_2)
 
     if "uploaded_file_1" and "uploaded_file_2" in st.session_state:
         if all(l in req_col_tolist(st.session_state.uploaded_file_1) for l in req_col_tolist(st.session_state.uploaded_file_2)):
