@@ -3,3 +3,4 @@ matplotlib
 plotly  
 pandas  # if you're using pandas  
 numpy   # if you're using numpy  
+streamlit-option-menu  
