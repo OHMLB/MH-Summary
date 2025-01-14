@@ -285,7 +285,7 @@ def main():
     if uploaded_file_2 is not None:  
         file_path_2 = save_uploaded_file(uploaded_file_2)  
         st.session_state.uploaded_file_2 = file_path_2  
-
+    
     uploaded_files = list_uploaded_files()
     if uploaded_files: 
         if len(uploaded_files) != 0:
@@ -299,6 +299,9 @@ def main():
             st.sidebar.write("Previously uploaded files:")
             selected_file_1 = st.sidebar.selectbox("Select an Actual MH file", actual_list)
             selected_file_2 = st.sidebar.selectbox("Select an Estimated MH file", estimated_list)
+
+        else:  
+            st.sidebar.write("No previously uploaded files found.")  
     # Load the selected files  
     if selected_file_1:  
         st.session_state.uploaded_file_1 = os.path.join(UPLOAD_DIR, selected_file_1)  
