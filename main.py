@@ -615,5 +615,4 @@ def main():
         else:
             st.subheader("Please choose the estimated and actual in same phase")
 if __name__ == "__main__":  
-    main()  
-
+    main()
