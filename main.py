@@ -274,39 +274,40 @@ def main():
     st.sidebar.header("Upload and Select Options")  
   
     # File uploader to upload the Excel file  
-    uploaded_file_1 = st.sidebar.file_uploader("Choose an Actual MH file", type="xlsx") 
-    uploaded_file_2 = st.sidebar.file_uploader("Choose an Estimated MH file", type="xlsx")
-  
-    # Check if the file has been uploaded and store it in session state  
-    if uploaded_file_1 is not None:
+    uploaded_file_1 = st.sidebar.file_uploader("Choose an Actual MH file", type="xlsx")  
+    uploaded_file_2 = st.sidebar.file_uploader("Choose an Estimated MH file", type="xlsx")  
+      
+    # Check if the file has been uploaded and store its path in session state  
+    if uploaded_file_1 is not None:  
         file_path_1 = save_uploaded_file(uploaded_file_1)  
         st.session_state.uploaded_file_1 = file_path_1  
-
+      
     if uploaded_file_2 is not None:  
         file_path_2 = save_uploaded_file(uploaded_file_2)  
         st.session_state.uploaded_file_2 = file_path_2  
-
-    uploaded_files = list_uploaded_files()
-    if uploaded_files: 
-        if len(uploaded_files) != 0:
-            actual_list, estimated_list = [],[]
-            for file in uploaded_files:
-                if "Summary" in file:
-                    actual_list.append(file)
-                elif "Estimated" in file:
-                    estimated_list.append(file)
-
-            st.sidebar.write("Previously uploaded files:")
-            selected_file_1 = st.sidebar.selectbox("Select an Actual MH file", actual_list)
-            selected_file_2 = st.sidebar.selectbox("Select an Estimated MH file", estimated_list)
-    # Load the selected files  
-    if selected_file_1:  
-        st.session_state.uploaded_file_1 = os.path.join(UPLOAD_DIR, selected_file_1)  
-    if selected_file_2:  
-        st.session_state.uploaded_file_2 = os.path.join(UPLOAD_DIR, selected_file_2)   
-
-    if "uploaded_file_1" and "uploaded_file_2" in st.session_state:
-        if all(l in req_col_tolist(st.session_state.uploaded_file_1) for l in req_col_tolist(st.session_state.uploaded_file_2)):
+      
+    uploaded_files = list_uploaded_files()  
+      
+    actual_list, estimated_list = [], []  
+    for file in uploaded_files:  
+        if "Summary" in file:  
+            actual_list.append(file)  
+        elif "Estimated" in file:  
+            estimated_list.append(file)  
+      
+    if uploaded_files:  
+        st.sidebar.write("Previously uploaded files:")  
+        selected_file_1 = st.sidebar.selectbox("Select an Actual MH file", actual_list, index=0 if 'uploaded_file_1' not in st.session_state else actual_list.index(os.path.basename(st.session_state.uploaded_file_1)) if os.path.basename(st.session_state.uploaded_file_1) in actual_list else 0)  
+        selected_file_2 = st.sidebar.selectbox("Select an Estimated MH file", estimated_list, index=0 if 'uploaded_file_2' not in st.session_state else estimated_list.index(os.path.basename(st.session_state.uploaded_file_2)) if os.path.basename(st.session_state.uploaded_file_2) in estimated_list else 0)  
+      
+        if selected_file_1:  
+            st.session_state.uploaded_file_1 = os.path.join("your_upload_directory", selected_file_1)  
+          
+        if selected_file_2:  
+            st.session_state.uploaded_file_2 = os.path.join("your_upload_directory", selected_file_2)  
+      
+    if "uploaded_file_1" in st.session_state and "uploaded_file_2" in st.session_state:  
+        if all(l in req_col_tolist(st.session_state.uploaded_file_1) for l in req_col_tolist(st.session_state.uploaded_file_2)):  
             # Read the uploaded file  
             df_MH = substitute_task_num(st.session_state.uploaded_file_1)   
             headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
