@@ -256,14 +256,20 @@ UPLOAD_DIR = "uploaded_files"
 if not os.path.exists(UPLOAD_DIR):  
     os.makedirs(UPLOAD_DIR)
 
-def save_uploaded_file(uploaded_file, upload_dir=UPLOAD_DIR):  
-    file_path = os.path.join(upload_dir, uploaded_file.name)  
+# Function to save the uploaded file  
+def save_uploaded_file(uploaded_file):  
+    UPLOAD_DIR = "your_upload_directory"  
+    if not os.path.exists(UPLOAD_DIR):  
+        os.makedirs(UPLOAD_DIR)  
+    file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)  
     with open(file_path, "wb") as f:  
         f.write(uploaded_file.getbuffer())  
     return file_path  
-
-def list_uploaded_files(upload_dir=UPLOAD_DIR):  
-    return list(set(os.listdir(upload_dir)))
+  
+# Function to list uploaded files  
+def list_uploaded_files():  
+    UPLOAD_DIR = "your_upload_directory"  
+    return [f for f in os.listdir(UPLOAD_DIR) if os.path.isfile(os.path.join(UPLOAD_DIR, f))]  
 
 def main():
 
