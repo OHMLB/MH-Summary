@@ -9,11 +9,7 @@ from streamlit_option_menu import option_menu
 import time
 
 def all_estimated_mh(path, req):
-    if os.path.exists(path):  
-        estimated_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
-    else:  
-        print(f"The file {path} does not exist.")  
-    
+    estimated_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     df_estimated = pd.DataFrame(estimated_mh)
     df_estimated = df_estimated[df_estimated["header"].isin(req)]
     print(df_estimated)
@@ -31,10 +27,7 @@ def prepend_number_if_contains(value, substring, number):
     return value  
 
 def substitute_task_num(path):
-    if os.path.exists(path):  
-        MH_summary = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
-    else:  
-        print(f"The file {path} does not exist.")  
+    MH_summary = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     df_MH = pd.DataFrame(MH_summary)
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Software Requirement', '1. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Detail Design', '2. '))
@@ -62,10 +55,7 @@ def MH_for_all_req(df_MH, req_list):
     return df_task_MH
 
 def req_tolist(path):
-    if os.path.exists(path):
-        MH_summary = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
-    else:  
-        print(f"The file {path} does not exist.")  
+    MH_summary = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     df_MH = pd.DataFrame(MH_summary)
     filter = ~((df_MH['header'].str.contains("Project Management"))|(df_MH['header'].str.contains("Project Support"))|(df_MH['header'].str.contains("Temp")))
     df_MH = df_MH[filter]
@@ -257,19 +247,13 @@ def mh_for_each_task(df):
     return df_merge, category, username
 
 def req_col_tolist(path):
-    if os.path.exists(path):  
-        df = pd.read_excel(path, engine="openpyxl")
-    else:  
-        print(f"The file {path} does not exist.")  
+    df = pd.read_excel(path, engine="openpyxl")
     mh_df = pd.DataFrame(df)
     req_list = list(set(mh_df["header"].to_list()))
     return req_list
 
-def each_person(path):\
-    if os.path.exists(path):  
-        df_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
-    else:  
-        print(f"The file {path} does not exist.")  
+def each_person(path):
+    df_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     group_mh = df_mh.groupby('username')
     df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values(by=['username','timeSpent'], ascending=[True, False])
     print(df_each_person)
@@ -638,4 +622,3 @@ def main():
         st.subheader("Please choose the estimated and actual in same phase")
 if __name__ == "__main__":  
     main()  
-
