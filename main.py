@@ -275,25 +275,32 @@ def main():
         st.session_state.file_paths = {'actual': [], 'estimated': []}  
 
     if 'file_name' not in st.session_state:
-        st.session_state.file_name = {}
+        st.session_state.file_name = {'actual': [], 'estimated': []}
   
     # Store file paths in session state  
     if uploaded_file_1 is not None:  
         actual_path = uploaded_file_1
         st.session_state.file_paths['actual'].append(actual_path)
+        st.session_state.file_name['actual'].append(actual_path.name)
   
     if uploaded_file_2 is not None:  
         estimated_path = uploaded_file_2
-        st.session_state.file_paths['estimated'].append(estimated_path)  
+        st.session_state.file_paths['estimated'].append(estimated_path) 
+        st.session_state.file_name['estimated'].append(estimated_path.name)
+
+    actual_file_mapping = {file.name: file for file in st.session_state.file_paths['actual']}  
+    estimated_file_mapping = {file.name: file for file in st.session_state.file_paths['estimated']}  
 
     # Dropdown selector to select from previously uploaded files  
     if st.session_state.file_paths['actual']:
-        selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
-                                                    st.session_state.file_paths['actual'])
+        selected_actual_file_name = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
+                                                    st.session_state.file_names['actual'])
+        selected_actual_file = actual_file_mapping[selected_actual_file_name]  
 
     if st.session_state.file_paths['estimated']:  
-        selected_estimated_file = st.sidebar.selectbox("Select an Estimated MH file from previous uploads",  
-                                                       st.session_state.file_paths['estimated'])
+        selected_estimated_file_name = st.sidebar.selectbox("Select an Estimated MH file from previous uploads",  
+                                                       st.session_state.file_names['estimated'])
+        selected_estimated_file = estimated_file_mapping[selected_estimated_file_name]
   
     if st.session_state.file_paths['actual'] != [] or st.session_state.file_paths['estimated'] != []:
         while not st.session_state.file_paths['actual'] and not st.session_state.file_paths['estimated']:  
