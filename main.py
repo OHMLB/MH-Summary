@@ -274,19 +274,19 @@ def main():
     if 'file_paths' not in st.session_state:  
         st.session_state.file_paths = {'actual': [], 'estimated': []}  
 
-    if 'file_name' not in st.session_state:
-        st.session_state.file_name = {'actual': [], 'estimated': []}
+    if 'file_names' not in st.session_state:
+        st.session_state.file_names = {'actual': [], 'estimated': []}
   
     # Store file paths in session state  
     if uploaded_file_1 is not None:  
         actual_path = uploaded_file_1
         st.session_state.file_paths['actual'].append(actual_path)
-        st.session_state.file_name['actual'].append(actual_path.name)
+        st.session_state.file_names['actual'].append(actual_path.name)
   
     if uploaded_file_2 is not None:  
         estimated_path = uploaded_file_2
         st.session_state.file_paths['estimated'].append(estimated_path) 
-        st.session_state.file_name['estimated'].append(estimated_path.name)
+        st.session_state.file_names['estimated'].append(estimated_path.name)
 
     actual_file_mapping = {file.name: file for file in st.session_state.file_paths['actual']}  
     estimated_file_mapping = {file.name: file for file in st.session_state.file_paths['estimated']}  
