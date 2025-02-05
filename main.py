@@ -252,13 +252,26 @@ def req_col_tolist(path):
     req_list = list(set(mh_df["header"].to_list()))
     return req_list
 
-def each_person(path):
+def each_person(path,req):
     df_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
+    df_mh = df_mh[df_mh["header"].isin(req)]
     group_mh = df_mh.groupby('username')
     df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values(by=['username','timeSpent'], ascending=[True, False])
     print(df_each_person)
-    #fig = px.bar(df_mh, x=)
-    return df_each_person
+    
+    fig = px.bar(df_mh, x='timeSpent', y='username', orientation='h',
+                title='Overall MH for each people',  
+                labels={'MH': "timeSpent", 'Team Member': 'username'}) 
+    
+    fig.update_layout(  
+        title_text='Overall MH for each people',  # Title of the chart  
+        title_x=0.5,  # Center the title  
+        xaxis_title='MH',  # X-axis label  
+        yaxis_title='Team Member',  # Y-axis label  
+    ) 
+
+    return df_each_person, fig
+    
 def main():  
     # Set the title of the Streamlit app  
     st.title("Man-Hours Analysis")  
@@ -310,8 +323,6 @@ def main():
         None 
   
     if st.session_state.file_paths['actual'] and st.session_state.file_paths['estimated']:  
-        # Read the uploaded file  
-        #print(each_person(selected_actual_file))
         df_MH = substitute_task_num(selected_actual_file)   
         headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
         icons=['file-earmark-text-fill', 'clipboard-data','database-fill'], 
@@ -339,6 +350,8 @@ def main():
         )
         for e_req in multi_side:
             req_list.remove(e_req)
+
+        each_p_fig = each_person(selected_actual_file,req_list)[1]
 
         if headerbar == "Overall":
             all_req_df = MH_for_all_req(df_MH, req_list)
@@ -521,6 +534,7 @@ def main():
                 fig_dif = mh_summary_plot(req_list,np.round(total_dif,2),total_est,np.array(total_act),"Different MH","Estimated MH","Actual MH")
                 st.plotly_chart(fig_dif, use_container_width=True)
                 st.write('')
+                st.plotly_chart(each_p_fig, use_container_width=True)
 
             if sub_sidebar == "Details" :
                 st.subheader("Man-Hours for Each Requirement")
