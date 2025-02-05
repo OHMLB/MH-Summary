@@ -477,7 +477,7 @@ def main():
                     total_act.append(act_mh_total)
                     total_est.append(est_mh_total)
                 total_dif = np.array(total_est) - np.array(total_act)
-                total_dif = max(total_dif)
+                total_dif = np.sort(total_dif)
                 abs_total_dif = abs(total_dif)
                 print(total_dif)
                 print(abs_total_dif)
