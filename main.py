@@ -257,7 +257,7 @@ def each_person(path,req):
     df_mh = df_mh[df_mh["header"].isin(req)]
     group_mh = df_mh.groupby('username')
     df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values(by=['username','timeSpent'], ascending=[False, True])
-    df_each_person = df_each_person.sort_values(by='timeSpent', ascending=False)
+    df_each_person.sort_values(by='timeSpent', ascending=False, ignore_index=True)
     print(df_each_person)
     
     fig = px.bar(df_mh, x='timeSpent', y='username', orientation='h',
