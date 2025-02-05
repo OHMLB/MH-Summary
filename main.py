@@ -256,10 +256,10 @@ def each_person(path,req):
     df_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     df_mh = df_mh[df_mh["header"].isin(req)]
     group_mh = df_mh.groupby('username')
-    df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values("timeSpent", ascending=True, ignore_index=True)
+    df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values("timeSpent", ascending=False, ignore_index=True)
     print(df_each_person)
     
-    fig = px.bar(df_mh, x='timeSpent', y='username', orientation='h',
+    fig = px.bar(df_each_person, x='timeSpent', y='username', orientation='h',
                 title='Overall MH for each people',  
                 labels={'MH': "timeSpent", 'Team Member': 'username'}
     ) 
