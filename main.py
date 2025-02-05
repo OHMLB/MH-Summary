@@ -532,6 +532,7 @@ def main():
 
                 #plot
                 df_dif_mh = pd.DataFrame({"req_list":req_list, "total_dif":np.round(total_dif,2), "total_est":total_est,"total_act": np.array(total_act)})
+                print(df_dif_mh)
                 df_dif_mh = df_dif_mh.sort_values("total_dif", ascending=True, ignore_index=True)
                 fig_dif = mh_summary_plot(df_dif_mh["req_list"],df_dif_mh["total_dif"],df_dif_mh["total_est"],df_dif_mh['total_act'],"Different MH","Estimated MH","Actual MH")
                 st.plotly_chart(fig_dif, use_container_width=True)
