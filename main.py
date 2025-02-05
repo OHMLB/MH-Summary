@@ -284,7 +284,7 @@ def main():
         est_path = r"E:\SVN\Diag_CommonDB\23_Tools\DIAG_Tools\ManHourSummary\MHRawData\Estimated_MH"  
         estimated_path =   est_path+"\\"+uploaded_file_2.name
         st.session_state.file_paths['estimated'].append(estimated_path)  
-    
+    print(st.session_state.file_paths)
     # Dropdown selector to select from previously uploaded files  
     if st.session_state.file_paths['actual']:  
         selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
