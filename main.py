@@ -477,7 +477,6 @@ def main():
                     total_act.append(act_mh_total)
                     total_est.append(est_mh_total)
                 total_dif = np.array(total_est) - np.array(total_act)
-                total_dif = np.sort(total_dif)
                 abs_total_dif = abs(total_dif)
                 print(total_dif)
                 print(abs_total_dif)
@@ -532,7 +531,9 @@ def main():
                 col_m5.markdown(create_metric("Min Usage MH", f"REQ. {req_list[total_act.index(min(total_act))]}", f"{min(total_act)} Hour"), unsafe_allow_html=True)  
 
                 #plot
-                fig_dif = mh_summary_plot(req_list,np.round(total_dif,2),total_est,np.array(total_act),"Different MH","Estimated MH","Actual MH")
+                df_dif_mh = pd.DataFrame({"req_list":req_list, "total_dif":np.round(total_dif,2), "total_est":total_est,"total_act": np.array(total_act)})
+                df_dif_mh = df_dif_mh.sort_values("total_dif", ascending=True, ignore_index=True)
+                fig_dif = mh_summary_plot(df_dif_mh["req_list"],df_dif_mh["total_dif"],df_dif_mh["total_est"],df_dif_mh['total_act'],"Different MH","Estimated MH","Actual MH")
                 st.plotly_chart(fig_dif, use_container_width=True)
                 st.write('')
                 st.plotly_chart(each_p_fig, use_container_width=True)
