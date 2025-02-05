@@ -272,7 +272,7 @@ def main():
   
     # Initialize session state for storing file paths if not already done  
     if 'file_paths' not in st.session_state:  
-        st.session_state.file_paths = {'actual': {}, 'estimated': {}}  
+        st.session_state.file_paths = {'actual': [], 'estimated': []}  
 
     if 'file_name' not in st.session_state:
         st.session_state.file_name = {}
@@ -280,19 +280,17 @@ def main():
     # Store file paths in session state  
     if uploaded_file_1 is not None:  
         actual_path = uploaded_file_1
-        st.session_state.file_name[actual_path.name] = actual_path
-        st.session_state.file_paths['actual'] = st.session_state.file_name[actual_path.name]
+        st.session_state.file_paths['actual'].append(actual_path)
   
     if uploaded_file_2 is not None:  
         estimated_path = uploaded_file_2
         st.session_state.file_paths['estimated'].append(estimated_path)  
-    print(st.session_state.file_paths)
+
     # Dropdown selector to select from previously uploaded files  
     if st.session_state.file_paths['actual']:
         list_keys_ac = list(st.session_state.file_paths['actual'].keys())
-        selected_actual_file_key = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
-                                                    list_keys_ac)
-        selected_actual_file = st.session_state.file_paths['actual'][selected_actual_file_key]
+        selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
+                                                    st.session_state.file_paths['actual'])
 
     if st.session_state.file_paths['estimated']:  
         selected_estimated_file = st.sidebar.selectbox("Select an Estimated MH file from previous uploads",  
