@@ -286,11 +286,11 @@ def main():
     # Dropdown selector to select from previously uploaded files  
     if st.session_state.file_paths['actual']:  
         selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
-                                                    list(set(st.session_state.file_paths['actual'])))  
+                                                    st.session_state.file_paths['actual'])
 
     if st.session_state.file_paths['estimated']:  
         selected_estimated_file = st.sidebar.selectbox("Select an Estimated MH file from previous uploads",  
-                                                       list(set(st.session_state.file_paths['estimated'])))  
+                                                       st.session_state.file_paths['estimated'])
   
     if st.session_state.file_paths['actual'] != [] or st.session_state.file_paths['estimated'] != []:
         while not st.session_state.file_paths['actual'] and not st.session_state.file_paths['estimated']:  
