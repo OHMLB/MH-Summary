@@ -277,20 +277,14 @@ def main():
     # Store file paths in session state  
     if uploaded_file_1 is not None:  
         ac_path = r"E:\SVN\Diag_CommonDB\23_Tools\DIAG_Tools\ManHourSummary\MHRawData\Actual_MH"  
-        actual_path = os.path.join(ac_path, uploaded_file_1.name)  
+        actual_path = ac_path+"\\"+uploaded_file_1.name  
         st.session_state.file_paths['actual'].append(actual_path)  
-        # Save the uploaded file locally  
-        with open(actual_path, "wb") as f:  
-            f.write(uploaded_file_1.getbuffer())  
   
     if uploaded_file_2 is not None:  
         est_path = r"E:\SVN\Diag_CommonDB\23_Tools\DIAG_Tools\ManHourSummary\MHRawData\Estimated_MH"  
-        estimated_path = os.path.join(est_path, uploaded_file_2.name)  
+        estimated_path =   est_path+"\\"+uploaded_file_2.name
         st.session_state.file_paths['estimated'].append(estimated_path)  
-        # Save the uploaded file locally  
-        with open(estimated_path, "wb") as f:  
-            f.write(uploaded_file_2.getbuffer())  
-  
+    
     # Dropdown selector to select from previously uploaded files  
     if st.session_state.file_paths['actual']:  
         selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
