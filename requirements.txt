@@ -5,3 +5,5 @@ matplotlib
 plotly  
 streamlit-option-menu  
 openpyxl  
+os
+time
