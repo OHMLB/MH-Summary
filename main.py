@@ -288,7 +288,6 @@ def main():
 
     # Dropdown selector to select from previously uploaded files  
     if st.session_state.file_paths['actual']:
-        list_keys_ac = list(st.session_state.file_paths['actual'].keys())
         selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
                                                     st.session_state.file_paths['actual'])
 
