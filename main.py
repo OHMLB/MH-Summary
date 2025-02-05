@@ -257,15 +257,16 @@ def each_person(path,req):
     df_mh = df_mh[df_mh["header"].isin(req)]
     group_mh = df_mh.groupby('username')
     df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values(by=['username','timeSpent'], ascending=[False, True])
+    df_each_person = df.sort_values(by='timeSpent', ascending=False)
     print(df_each_person)
     
     fig = px.bar(df_mh, x='timeSpent', y='username', orientation='h',
                 title='Overall MH for each people',  
-                labels={'MH': "timeSpent", 'Team Member': 'username'}) 
+                labels={'MH': "timeSpent", 'Team Member': 'username'}
+    ) 
     
     fig.update_layout(  
-        title_text='Overall MH for each people',  # Title of the chart  
-        title_x=0.5,  # Center the title  
+        title_text='Overall MH for each people',  
         xaxis_title='MH',  # X-axis label  
         yaxis_title='Team Member',  # Y-axis label  
     ) 
