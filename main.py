@@ -4,7 +4,9 @@ import pandas as pd
 import numpy as np
 import os 
 import plotly.graph_objects as go
+import plotly.express as px 
 from streamlit_option_menu import option_menu
+import time
 
 def all_estimated_mh(path, req):
     estimated_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
@@ -139,7 +141,7 @@ class ManHoursAnalysis:
             mode='lines+markers+text',
             name = "Estimated",
             text = self.estimated_mh_array,
-            line=dict(color='rgba(255, 123, 0, 0.7)', width=2),  
+            line=dict(color='rgba(250, 156, 28, 1)', width=5),   
             marker=dict(symbol='circle', size=8),
             textposition= 'top center'  
         ))
@@ -250,376 +252,380 @@ def req_col_tolist(path):
     req_list = list(set(mh_df["header"].to_list()))
     return req_list
 
-UPLOAD_DIR = "uploaded_files"  
-  
-# Ensure the upload directory exists  
-if not os.path.exists(UPLOAD_DIR):  
-    os.makedirs(UPLOAD_DIR)
-
-# Function to save the uploaded file  
-def save_uploaded_file(uploaded_file):  
-    UPLOAD_DIR = "your_upload_directory"  
-    if not os.path.exists(UPLOAD_DIR):  
-        os.makedirs(UPLOAD_DIR)  
-    file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)  
-    with open(file_path, "wb") as f:  
-        f.write(uploaded_file.getbuffer())  
-    return file_path  
-  
-# Function to list uploaded files  
-def list_uploaded_files():  
-    UPLOAD_DIR = "your_upload_directory"  
-    return [f for f in os.listdir(UPLOAD_DIR) if os.path.isfile(os.path.join(UPLOAD_DIR, f))]  
-
-def main():
-
+def each_person(path):
+    df_mh = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
+    group_mh = df_mh.groupby('username')
+    df_each_person = group_mh["timeSpent"].sum().reset_index().sort_values(by=['username','timeSpent'], ascending=[True, False])
+    print(df_each_person)
+    #fig = px.bar(df_mh, x=)
+    return df_each_person
+def main():  
     # Set the title of the Streamlit app  
     st.title("Man-Hours Analysis")  
-    
+  
     # Add a sidebar for file upload and requirement selection  
     st.sidebar.header("Upload and Select Options")  
   
-    # File uploader to upload the Excel file  
+    # File uploader to upload the Excel files  
     uploaded_file_1 = st.sidebar.file_uploader("Choose an Actual MH file", type="xlsx")  
     uploaded_file_2 = st.sidebar.file_uploader("Choose an Estimated MH file", type="xlsx")  
-      
-    # Check if the file has been uploaded and store its path in session state  
+  
+    # Initialize session state for storing file paths if not already done  
+    if 'file_paths' not in st.session_state:  
+        st.session_state.file_paths = {'actual': [], 'estimated': []}  
+  
+    # Store file paths in session state  
     if uploaded_file_1 is not None:  
-        file_path_1 = save_uploaded_file(uploaded_file_1)  
-        st.session_state.uploaded_file_1 = file_path_1  
-      
+        ac_path = r"E:\SVN\Diag_CommonDB\23_Tools\DIAG_Tools\ManHourSummary\MHRawData\Actual_MH"  
+        actual_path = os.path.join(ac_path, uploaded_file_1.name)  
+        st.session_state.file_paths['actual'].append(actual_path)  
+        # Save the uploaded file locally  
+        with open(actual_path, "wb") as f:  
+            f.write(uploaded_file_1.getbuffer())  
+  
     if uploaded_file_2 is not None:  
-        file_path_2 = save_uploaded_file(uploaded_file_2)  
-        st.session_state.uploaded_file_2 = file_path_2  
-      
-    uploaded_files = list_uploaded_files()  
-      
-    actual_list, estimated_list = [], []  
-    for file in uploaded_files:  
-        if "Summary" in file:  
-            actual_list.append(file)  
-        elif "Estimated" in file:  
-            estimated_list.append(file)  
-      
-    if uploaded_files:  
-        st.sidebar.write("Previously uploaded files:")  
-        selected_file_1 = st.sidebar.selectbox("Select an Actual MH file", actual_list, index=0 if 'uploaded_file_1' not in st.session_state else actual_list.index(os.path.basename(st.session_state.uploaded_file_1)) if os.path.basename(st.session_state.uploaded_file_1) in actual_list else 0)  
-        selected_file_2 = st.sidebar.selectbox("Select an Estimated MH file", estimated_list, index=0 if 'uploaded_file_2' not in st.session_state else estimated_list.index(os.path.basename(st.session_state.uploaded_file_2)) if os.path.basename(st.session_state.uploaded_file_2) in estimated_list else 0)  
-      
-        if selected_file_1:  
-            st.session_state.uploaded_file_1 = os.path.join("your_upload_directory", selected_file_1)  
-          
-        if selected_file_2:  
-            st.session_state.uploaded_file_2 = os.path.join("your_upload_directory", selected_file_2)  
-      
-    if "uploaded_file_1" in st.session_state and "uploaded_file_2" in st.session_state:  
-        if all(l in req_col_tolist(st.session_state.uploaded_file_1) for l in req_col_tolist(st.session_state.uploaded_file_2)):  
-            # Read the uploaded file  
-            df_MH = substitute_task_num(st.session_state.uploaded_file_1)   
-            headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
-            icons=['file-earmark-text-fill', 'clipboard-data','database-fill'], 
-            menu_icon= "cast", default_index=0, orientation="horizontal")
+        est_path = r"E:\SVN\Diag_CommonDB\23_Tools\DIAG_Tools\ManHourSummary\MHRawData\Estimated_MH"  
+        estimated_path = os.path.join(est_path, uploaded_file_2.name)  
+        st.session_state.file_paths['estimated'].append(estimated_path)  
+        # Save the uploaded file locally  
+        with open(estimated_path, "wb") as f:  
+            f.write(uploaded_file_2.getbuffer())  
+  
+    # Dropdown selector to select from previously uploaded files  
+    if st.session_state.file_paths['actual']:  
+        selected_actual_file = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
+                                                    list(set(st.session_state.file_paths['actual'])))  
 
-            req_list = req_tolist(st.session_state.uploaded_file_1)
-            estimated_df = all_estimated_mh(st.session_state.uploaded_file_2,req_list)[1]
-            df_mh_2 = substitute_task_num(st.session_state.uploaded_file_1)
-            for req in req_list:
-                if req not in list(set(estimated_df["header"].to_list())):
-                    req_list.remove(req)
-            print(f"Req. list {req_list}")
+    if st.session_state.file_paths['estimated']:  
+        selected_estimated_file = st.sidebar.selectbox("Select an Estimated MH file from previous uploads",  
+                                                       list(set(st.session_state.file_paths['estimated'])))  
+  
+    if st.session_state.file_paths['actual'] != [] or st.session_state.file_paths['estimated'] != []:
+        while not st.session_state.file_paths['actual'] and not st.session_state.file_paths['estimated']:  
+            st.write("Waiting for files to be uploaded...")  
+            time.sleep(1)  # Wait for 1 second before checking again
+    else:
+        None 
+  
+    if st.session_state.file_paths['actual'] and st.session_state.file_paths['estimated']:  
+        # Read the uploaded file  
+        print(each_person(selected_actual_file))
+        df_MH = substitute_task_num(selected_actual_file)   
+        headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
+        icons=['file-earmark-text-fill', 'clipboard-data','database-fill'], 
+        menu_icon= "cast", default_index=0, orientation="horizontal")
 
-            if 'selected_option' not in st.session_state:  
-                st.session_state.selected_option = None
+        req_list = req_tolist( selected_actual_file)
+        estimated_df = all_estimated_mh(selected_estimated_file,req_list)[1]
+        df_mh_2 = substitute_task_num( selected_actual_file)
+        for req in req_list:
+            if req not in list(set(estimated_df["header"].to_list())):
+                print("CANCEL",req,req_list)
+                req_list.remove(req)
+            else:
+                None
+        print(f"Requirement list {req_list}")
 
-            cancel_req = req_list
-            st.sidebar.header("Fill Out Requirement")
-            multi_side = st.sidebar.multiselect(  
-                'Fill Out:',  cancel_req,
-                default = st.session_state.selected_option
-            )
-            for e_req in multi_side:
-                req_list.remove(e_req)
+        if 'selected_option' not in st.session_state:  
+            st.session_state.selected_option = None
 
-            if headerbar == "Overall":
-                all_req_df = MH_for_all_req(df_MH, req_list)
-                all_req_df.reset_index(drop=True, inplace=True)
-                all_req_df["Estimated"] = all_estimated_mh(st.session_state.uploaded_file_2,req_list)[0]
-                # total_row = all_req_df[['timeSpent', 'Estimated']].sum().to_frame().T 
-                # total_row['phase'] = 'Total'  
-                # total_row['task name'] = ''
-                # total_row = total_row[['phase', 'task name', 'timeSpent', 'Estimated']]
-                # df = pd.concat([df, total_row], ignore_index=True)  
-                all_req_style_df = all_req_df.style.apply(lambda row: highlight_cells(row,"Estimated","timeSpent"), axis=1)
+        cancel_req = req_list
+        st.sidebar.header("Fill Out Requirement")
+        multi_side = st.sidebar.multiselect(  
+            'Fill Out:',  cancel_req,
+            default = st.session_state.selected_option
+        )
+        for e_req in multi_side:
+            req_list.remove(e_req)
 
-                # Display the dataframe for the selected requirement  
-                st.subheader("Man-Hours for All Requirement")
-                st.write('')
+        if headerbar == "Overall":
+            all_req_df = MH_for_all_req(df_MH, req_list)
+            all_req_df.reset_index(drop=True, inplace=True)
+            all_req_df["Estimated"] = all_estimated_mh(selected_estimated_file,req_list)[0]
+            sum_actual = all_req_df["timeSpent"].sum()
+            sum_estimated = all_req_df["Estimated"].sum()
+            total_row = pd.DataFrame({col: [value] for col, value in zip(all_req_df.columns.to_list(), ["S0101240201_H00A", "Total", sum_actual, sum_estimated])})
+            print(total_row)
+            new_all_req_df = pd.concat([all_req_df,total_row], ignore_index=True)
+            all_req_style_df = new_all_req_df.style.apply(lambda row: highlight_cells(row,"Estimated","timeSpent"), axis=1)
 
-                # start_d = st.date_input("Start Date")
-                # end_d = st.date_input("End Date")
-                # Initialize session state for number inputs  
-                if 'plan_progress' not in st.session_state:  
-                    st.session_state.plan_progress = 0.00
-                if 'actual_progress' not in st.session_state:  
-                    st.session_state.actual_progress = 0.00 
-    
-                # Number inputs for progress  
-                st.session_state.plan_progress = st.number_input("Plan Progress", value=st.session_state.plan_progress, step=0.01, format="%.2f")  
-                st.session_state.actual_progress = st.number_input("Actual Progress", value=st.session_state.actual_progress, step=0.01, format="%.2f")  
-                
-                col1,col2 = st.columns([0.07,1])
-                with col2:
-                    st.write('Actual MH vs. Estmated MH Table')
-                    # Toggle button to show/hide dataframe  
-                with col1:
-                    if st.button('📄'):
-                        st.session_state.show_table = not st.session_state.get('show_table', True)
-                # Display the dataframe based on the button state  
-                if st.session_state.get('show_table', True):
-                    col_df1, col_df2 = st.columns([3,1])
-                    with col_df1:
-                        st.dataframe(all_req_style_df)
-                    with col_df2:
-                        mh_sum = mh_summary(all_req_df,st.session_state.plan_progress,st.session_state.actual_progress)
-                        st.write(f'MH Deviation   : {mh_sum.mh_deviation():.2f}%')
-                        st.write(f'Schedule Delay : {mh_sum.schedule_delay():.2f}%')
-                        if st.button("Details"):  
-                            st.session_state.page = "details"
-                st.write('')
-                
-                if 'show_chart' not in st.session_state:  
-                    st.session_state.show_chart = True
+            # Display the dataframe for the selected requirement  
+            st.subheader("Man-Hours for All Requirement")
+            st.write('')
 
-                # Set up the Streamlit columns  
-                t_col_1, t_col_2 = st.columns([0.07, 1])  
-                
-                with t_col_2:  
-                    st.write("Actual MH vs. Estimated MH Chart")  
-                
-                with t_col_1:  
-                    if st.button('📊'):  
-                        st.session_state.show_chart = not st.session_state.show_chart
-                
-                if st.session_state.show_chart:  
-                    # Create a Plotly figure  
-                    fig = go.Figure()  
-                    
-                    # Actual MH  
-                    fig.add_trace(go.Bar(  
-                        x=all_req_df["task name"].tolist(),  
-                        y=all_req_df["timeSpent"].tolist(),  
-                        name="Actual MH",  
-                        text=all_req_df["timeSpent"].astype(float).round(2).tolist(),  
-                        offsetgroup=0  
-                    ))  
-                    
-                    # Estimated MH  
-                    fig.add_trace(go.Bar(  
-                        x=all_req_df["task name"].tolist(),  
-                        y=all_req_df["Estimated"].tolist(),  
-                        name="Estimated MH",  
-                        text=all_req_df["Estimated"].astype(float).round(2).tolist(),  
-                        offsetgroup=1
-                    ))  
-                    
-                    fig.update_layout(  
-                        title="Actual MH vs. Estimated MH",  
-                        xaxis=dict(title="Task"),  
-                        yaxis=dict(title="MH"),  
-                        barmode="group",
-                        width=1000,
-                        height=500
-                    )  
-                    
-                    st.plotly_chart(fig,use_container_width=True)
+            # start_d = st.date_input("Start Date")
+            # end_d = st.date_input("End Date")
+            # Initialize session state for number inputs  
+            if 'plan_progress' not in st.session_state:  
+                st.session_state.plan_progress = 0.00
+            if 'actual_progress' not in st.session_state:  
+                st.session_state.actual_progress = 0.00 
+
+            # Number inputs for progress  
+            st.session_state.plan_progress = st.number_input("Plan Progress", value=st.session_state.plan_progress, step=0.01, format="%.2f")  
+            st.session_state.actual_progress = st.number_input("Actual Progress", value=st.session_state.actual_progress, step=0.01, format="%.2f")  
             
-            if headerbar == "Requirement":
-                if 'sub_sidebar' not in st.session_state:  
-                    st.session_state.sub_sidebar = "Summary"
+            col1,col2 = st.columns([0.07,1])
+            with col2:
+                st.write('Actual MH vs. Estmated MH Table')
+                # Toggle button to show/hide dataframe  
+            with col1:
+                if st.button('📄'):
+                    st.session_state.show_table = not st.session_state.get('show_table', True)
+            # Display the dataframe based on the button state  
+            if st.session_state.get('show_table', True):
+                col_df1, col_df2 = st.columns([3,1])
+                with col_df1:
+                    st.dataframe(all_req_style_df)
+                with col_df2:
+                    mh_sum = mh_summary(all_req_df,st.session_state.plan_progress,st.session_state.actual_progress)
+                    st.write(f'MH Deviation   : {mh_sum.mh_deviation():.2f}%')
+                    st.write(f'Schedule Delay : {mh_sum.schedule_delay():.2f}%')
+                    if st.button("Details"):  
+                        st.session_state.page = "details"
+            st.write('')
+            
+            if 'show_chart' not in st.session_state:  
+                st.session_state.show_chart = True
 
-                st.sidebar.header("Requirement")
-
-                options = ["Summary","Details"]
-                sub_sidebar = st.sidebar.radio("Select", options, index=options.index(st.session_state.sub_sidebar))
-                st.session_state.sub_sidebar = sub_sidebar
-
-                if sub_sidebar == "Summary":
-                    st.subheader("Man-Hours Summary")
-                    st.write("")
-
-                    total_act = []
-                    total_est = []
-                    for each_req in req_list:
-                        each_req_df = MH_for_each_req(df_mh_2, each_req)
-                        mh_a = ManHoursAnalysis(each_req_df, estimated_df, each_req)
-                        act_mh = mh_a.calculate_mh_array()[4]
-                        act_mh_total = round(np.sum(act_mh),2)
-                        print(f"Total Actual Amount {act_mh_total}")
-                        est_mh = mh_a.calculate_mh_array()[5]
-                        est_mh_total = round(np.sum(est_mh),2)
-                        print(f"Total Estimated Amount {est_mh_total}")
-                        total_act.append(act_mh_total)
-                        total_est.append(est_mh_total)
-                    total_dif = np.array(total_est) - np.array(total_act)
-                    print(total_dif)
-
-                    #add metrics
-                    col_m1,col_m2,col_m3,col_m4 = st.columns(4)
-
-                    st.markdown(  
-                        """  
-                        <style>  
-                        .metric {  
-                            /* border: 2px solid #c5d9ed;*/  /* Border color and thickness */  
-                            border-radius: 5px; /* Rounded corners */  
-                            padding: 10px; /* Padding inside the border */  
-                            margin: 5px; /* Margin outside the border */  
-                            background-color: #2e3338;
-                        }  
-                        .metric-label {  
-                            font-size: 12px;  
-                            font-weight: bold;
-                            color: #d63638;  
-                        }  
-                        .metric-value {  
-                            font-size: 20px;  
-                            font-weight: bold;
-                            color: #f6f7f7;  
-                        }  
-                        .metric-delta {  
-                            font-size: 16px;  
-                            color: ##f6f7f7;  
-                        }  
-                        </style>  
-                        """,  
-                        unsafe_allow_html=True  
-                    )  
-    
-                    # Create a function to generate metric HTML  
-                    def create_metric(label, value, delta):  
-                        return f"""  
-                        <div class="metric">  
-                            <div class="metric-label">{label}</div>  
-                            <div class="metric-value">{value}</div>  
-                            <div class="metric-delta">{delta}</div>  
-                        </div>  
-                        """  
-                                    
-                    # Add metrics with custom CSS classes and border styling using parameters  
-                    col_m1.markdown(create_metric("The highest Dif MH" ,f"REQ. {req_list[np.where(total_dif==max(total_dif))[0][0]]}", f"{max(total_dif)} Hour"), unsafe_allow_html=True)  
-                    col_m2.markdown(create_metric("The lowest Dif MH" ,f"REQ. {req_list[np.where(total_dif==min(total_dif))[0][0]]}", f"{min(total_dif)} Hour"), unsafe_allow_html=True)  
-                    col_m3.markdown(create_metric("Most Usage MH", f"REQ. {req_list[total_act.index(max(total_act))]}", f"{max(total_act)} Hour"), unsafe_allow_html=True)
-                    col_m4.markdown(create_metric("Min Usage MH", f"REQ. {req_list[total_act.index(min(total_act))]}", f"{min(total_act)} Hour"), unsafe_allow_html=True)  
-
-                    #plot
-                    fig_dif = mh_summary_plot(req_list,np.round(total_dif,2),total_est,np.array(total_act),"Different MH","Estimated MH","Actual MH")
-                    st.plotly_chart(fig_dif, use_container_width=True)
-
-                if sub_sidebar == "Details" :
-                    st.subheader("Man-Hours for Each Requirement")
-                    st.write("")
-                    # col_2_1,col_2_2 = st.columns([5,100])
-                    # with col_2_1:
-                    #     st.write("List of Requirement ")
+            # Set up the Streamlit columns  
+            t_col_1, t_col_2 = st.columns([0.07, 1])  
+            
+            with t_col_2:  
+                st.write("Actual MH vs. Estimated MH Chart")  
+            
+            with t_col_1:  
+                if st.button('📊'):  
+                    st.session_state.show_chart = not st.session_state.show_chart
+            
+            if st.session_state.show_chart:  
+                # Create a Plotly figure  
+                fig = go.Figure()  
+                
+                # Actual MH  
+                fig.add_trace(go.Bar(  
+                    x=all_req_df["task name"].tolist(),  
+                    y=all_req_df["timeSpent"].tolist(),  
+                    name="Actual MH",  
+                    text=all_req_df["timeSpent"].astype(float).round(2).tolist(),  
+                    offsetgroup=0  
+                ))  
+                
+                # Estimated MH  
+                fig.add_trace(go.Scatter(  
+                    x=all_req_df["task name"].tolist(),  
+                    y=all_req_df["Estimated"].tolist(), 
+                    mode='lines+markers+text', 
+                    name="Estimated MH",  
+                    text=all_req_df["Estimated"].astype(float).round(2).tolist(),  
+                    line=dict(color='rgba(250, 156, 28, 1)', width=5),    
+                    marker=dict(symbol='circle', size=8),
+                    textposition= 'top center' 
+                ))
                     
-                    if 'selected_req' not in st.session_state:  
-                        st.session_state.selected_req = None
-
-                    st.session_state.selected_req = st.selectbox("Select a Requirement", req_list, index=req_list.index(st.session_state.selected_req) if st.session_state.selected_req else 0)  
-                    st.write('')  
-                    st.write('') 
-
-                    if st.session_state.selected_req:
-                        req_df = MH_for_each_req(df_mh_2, st.session_state.selected_req)
-                        req_df.reset_index(drop=True, inplace=True)
-                        col2_1,col2_2 = st.columns([0.07,1])
-                        with col2_2:
-                            st.write(f"Data for Requirement: {st.session_state.selected_req}")
-                        mh_analysis = ManHoursAnalysis(req_df, estimated_df, st.session_state.selected_req)
-                        actual_mh_array = mh_analysis.calculate_mh_array()[4]
-                        estimated_mh_array = mh_analysis.calculate_mh_array()[5]
-                        task = mh_analysis.calculate_mh_array()[0]
-                        username = mh_analysis.calculate_mh_array()[1]
-                        actual_mh_array_t = actual_mh_array.transpose()
-                        df_merge = pd.DataFrame(actual_mh_array_t, index=task, columns=username)
-                        df_merge["Actual MH"] = df_merge.sum(axis=1)
-                        df_merge["Estimated MH"] = estimated_mh_array
-                        df_merge.loc["Grand"] = df_merge.sum(axis=0)
-                        df_merge_style = df_merge.style.apply(lambda row: highlight_cells(row,"Estimated MH","Actual MH"), axis=1)  
-
-                        with col2_1:
-                            if st.button('📄'):
-                                st.session_state.show_table = not st.session_state.get('show_table', True)
-                        if st.session_state.get('show_table', True):
-                            st.dataframe(df_merge_style)
-                        st.write('')
-
-                        if 'show_chart' not in st.session_state:  
-                            st.session_state.show_chart = True
+                fig.update_layout(  
+                    title="Actual MH vs. Estimated MH",  
+                    xaxis=dict(title="Task"),  
+                    yaxis=dict(title="MH"),  
+                    barmode="group",
+                    width=1000,
+                    height=500
+                )  
+                
+                st.plotly_chart(fig,use_container_width=True)
         
-                        t_col_2_1, t_col_2_2 = st.columns([0.07, 1])
-                        with t_col_2_2: 
-                            st.write(f'Actual MH vs. Estimated MH of Req. {st.session_state.selected_req} Chart')
-                        
-                        with t_col_2_1:
-                            if st.button('📊'):  
-                                st.session_state.show_chart = not st.session_state.show_chart
-                        if st.session_state.show_chart:
-                            fig =  mh_analysis.plot_stacked_bar()
-                            st.plotly_chart(fig, use_container_width=True)
+        if headerbar == "Requirement":
+            if 'sub_sidebar' not in st.session_state:  
+                st.session_state.sub_sidebar = "Summary"
 
+            st.sidebar.header("Requirement")
+
+            options = ["Summary","Details"]
+            sub_sidebar = st.sidebar.radio("Select", options, index=options.index(st.session_state.sub_sidebar))
+            st.session_state.sub_sidebar = sub_sidebar
+
+            if sub_sidebar == "Summary":
+                st.subheader("Man-Hours Summary")
+                st.write("")
+
+                total_act = []
+                total_est = []
+                for each_req in req_list:
+                    each_req_df = MH_for_each_req(df_mh_2, each_req)
+                    mh_a = ManHoursAnalysis(each_req_df, estimated_df, each_req)
+                    act_mh = mh_a.calculate_mh_array()[4]
+                    act_mh_total = round(np.sum(act_mh),2)
+                    print(f"Total Actual Amount {act_mh_total}")
+                    est_mh = mh_a.calculate_mh_array()[5]
+                    est_mh_total = round(np.sum(est_mh),2)
+                    print(f"Total Estimated Amount {est_mh_total}")
+                    total_act.append(act_mh_total)
+                    total_est.append(est_mh_total)
+                total_dif = np.array(total_est) - np.array(total_act)
+                abs_total_dif = abs(total_dif)
+                print(total_dif)
+                print(abs_total_dif)
+
+                #add metrics
+                col_m1,col_m2,col_m3,col_m4,col_m5 = st.columns(5)
+
+                st.markdown(  
+                    """  
+                    <style>  
+                    .metric {  
+                        /* border: 2px solid #c5d9ed;*/  /* Border color and thickness */  
+                        border-radius: 5px; /* Rounded corners */  
+                        padding: 10px; /* Padding inside the border */  
+                        margin: 5px; /* Margin outside the border */  
+                        background-color: #2e3338;
+                    }  
+                    .metric-label {  
+                        font-size: 12px;  
+                        font-weight: bold;
+                        color: #d63638;  
+                    }  
+                    .metric-value {  
+                        font-size: 20px;  
+                        font-weight: bold;
+                        color: #f6f7f7;  
+                    }  
+                    .metric-delta {  
+                        font-size: 16px;  
+                        color: #f6f7f7;  
+                    }  
+                    </style>  
+                    """,  
+                    unsafe_allow_html=True  
+                )  
+
+                # Create a function to generate metric HTML  
+                def create_metric(label, value, delta):  
+                    return f"""  
+                    <div class="metric">  
+                        <div class="metric-label">{label}</div>  
+                        <div class="metric-value">{value}</div>  
+                        <div class="metric-delta">{delta}</div>  
+                    </div>  
+                    """  
+                                
+                # Add metrics with custom CSS classes and border styling using parameters  
+                col_m1.markdown(create_metric("Under Estimate MH" ,f"REQ. {req_list[np.where(total_dif==max(total_dif))[0][0]]}", f"{max(total_dif)} Hour"), unsafe_allow_html=True)  
+                col_m2.markdown(create_metric("Over Estimate MH" ,f"REQ. {req_list[np.where(total_dif==min(total_dif))[0][0]]}", f"{min(total_dif)} Hour"), unsafe_allow_html=True) 
+                col_m3.markdown(create_metric("Most Diffence MH" ,f"REQ. {req_list[np.where(abs_total_dif==max(abs_total_dif))[0][0]]}", f"{max(abs_total_dif)} Hour"), unsafe_allow_html=True)
+                col_m4.markdown(create_metric("Most Usage MH", f"REQ. {req_list[total_act.index(max(total_act))]}", f"{max(total_act)} Hour"), unsafe_allow_html=True)
+                col_m5.markdown(create_metric("Min Usage MH", f"REQ. {req_list[total_act.index(min(total_act))]}", f"{min(total_act)} Hour"), unsafe_allow_html=True)  
+
+                #plot
+                fig_dif = mh_summary_plot(req_list,np.round(total_dif,2),total_est,np.array(total_act),"Different MH","Estimated MH","Actual MH")
+                st.plotly_chart(fig_dif, use_container_width=True)
+                st.write('')
+
+            if sub_sidebar == "Details" :
+                st.subheader("Man-Hours for Each Requirement")
+                st.write("")
+                # col_2_1,col_2_2 = st.columns([5,100])
+                # with col_2_1:
+                #     st.write("List of Requirement ")
+                
+                if 'selected_req' not in st.session_state:  
+                    st.session_state.selected_req = None
+
+                st.session_state.selected_req = st.selectbox("Select a Requirement", req_list, index=req_list.index(st.session_state.selected_req) if st.session_state.selected_req else 0)  
+                st.write('')  
+                st.write('') 
+
+                if st.session_state.selected_req:
+                    req_df = MH_for_each_req(df_mh_2, st.session_state.selected_req)
+                    req_df.reset_index(drop=True, inplace=True)
+                    col2_1,col2_2 = st.columns([0.07,1])
+                    with col2_2:
+                        st.write(f"Data for Requirement: {st.session_state.selected_req}")
+                    mh_analysis = ManHoursAnalysis(req_df, estimated_df, st.session_state.selected_req)
+                    actual_mh_array = mh_analysis.calculate_mh_array()[4]
+                    estimated_mh_array = mh_analysis.calculate_mh_array()[5]
+                    task = mh_analysis.calculate_mh_array()[0]
+                    username = mh_analysis.calculate_mh_array()[1]
+                    actual_mh_array_t = actual_mh_array.transpose()
+                    df_merge = pd.DataFrame(actual_mh_array_t, index=task, columns=username)
+                    df_merge["Actual MH"] = df_merge.sum(axis=1)
+                    df_merge["Estimated MH"] = estimated_mh_array
+                    df_merge.loc["Grand"] = df_merge.sum(axis=0)
+                    df_merge_style = df_merge.style.apply(lambda row: highlight_cells(row,"Estimated MH","Actual MH"), axis=1)  
+
+                    with col2_1:
+                        if st.button('📄'):
+                            st.session_state.show_table = not st.session_state.get('show_table', True)
+                    if st.session_state.get('show_table', True):
+                        st.dataframe(df_merge_style)
+                    st.write('')
+
+                    if 'show_chart' not in st.session_state:  
+                        st.session_state.show_chart = True
+    
+                    t_col_2_1, t_col_2_2 = st.columns([0.07, 1])
+                    with t_col_2_2: 
+                        st.write(f'Actual MH vs. Estimated MH of Req. {st.session_state.selected_req} Chart')
+                    
+                    with t_col_2_1:
+                        if st.button('📊'):  
+                            st.session_state.show_chart = not st.session_state.show_chart
+                    if st.session_state.show_chart:
+                        fig =  mh_analysis.plot_stacked_bar()
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    st.write("")
+
+                    st.write("--------------------------------------------------------------------------------------")
+
+                    st.subheader("Man-Hours for Each Task")
+
+                    if 'selected_task' not in st.session_state:  
+                        st.session_state.selected_task = None
+
+
+                    multi_select = st.sidebar.multiselect(  
+                        'Select Task:',  task,
+                        default = st.session_state.selected_task
+                    )
+
+                    all_1 = st.sidebar.checkbox("Select all", value=True)
+
+                    if all_1:
+                        multi_select = task
+
+                    for task_sel in multi_select:
+                        st.write(f"Data Table of {task_sel} task")
+                        task_df,categry,name = mh_for_each_task(req_df[req_df["task name"] == task_sel])
+                        #st.dataframe(req_df[req_df["task name"] == task_sel])
+                        st.dataframe(task_df)
                         st.write("")
 
-                        st.write("--------------------------------------------------------------------------------------")
+                        task_fig = go.Figure()
+                        
+                        for user in name:
+                            task_fig.add_trace(go.Bar(
+                                x = categry,
+                                y = task_df[user],
+                                name = user
+                            ))
 
-                        st.subheader("Man-Hours for Each Task")
-
-                        if 'selected_task' not in st.session_state:  
-                            st.session_state.selected_task = None
-
-    
-                        multi_select = st.sidebar.multiselect(  
-                            'Select Task:',  task,
-                            default = st.session_state.selected_task
+                        task_fig.update_layout(title=f"MH of each category for {task_sel} task chart ",  
+                            xaxis=dict(title="Category"),  
+                            yaxis=dict(title="MH"),  
+                            barmode="stack",
+                            width=1000,
+                            height=500
                         )
 
-                        all_1 = st.sidebar.checkbox("Select all", value=True)
+                        st.plotly_chart(task_fig, use_container_width=True)
+                        st.write("--------------------------------------------------------------------------------------")
 
-                        if all_1:
-                            multi_select = task
-
-                        for task_sel in multi_select:
-                            st.write(f"Data Table of {task_sel} task")
-                            task_df,categry,name = mh_for_each_task(req_df[req_df["task name"] == task_sel])
-                            #st.dataframe(req_df[req_df["task name"] == task_sel])
-                            st.dataframe(task_df)
-                            st.write("")
-
-                            task_fig = go.Figure()
-                            
-                            for user in name:
-                                task_fig.add_trace(go.Bar(
-                                    x = categry,
-                                    y = task_df[user],
-                                    name = user
-                                ))
-
-                            task_fig.update_layout(title=f"MH of each category for {task_sel} task chart ",  
-                                xaxis=dict(title="Category"),  
-                                yaxis=dict(title="MH"),  
-                                barmode="stack",
-                                width=1000,
-                                height=500
-                            )
-
-                            st.plotly_chart(task_fig, use_container_width=True)
-                            st.write("--------------------------------------------------------------------------------------")
-
-            if headerbar == "Database":
-                #st.subheader("Raw DATA")
-                st.dataframe(df_MH.drop(columns=["Unnamed: 0","date"]))
-                    
-        else:
-            st.subheader("Please choose the estimated and actual in same phase")
+        if headerbar == "Database":
+            #st.subheader("Raw DATA")
+            st.dataframe(df_MH.drop(columns=["Unnamed: 0","date"]))
+                
+    else:
+        st.subheader("Please choose the estimated and actual in same phase")
 if __name__ == "__main__":  
-    main()
+    main()  
+
