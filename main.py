@@ -276,11 +276,11 @@ def main():
   
     # Store file paths in session state  
     if uploaded_file_1 is not None:  
-        actual_path = uploaded_file_1
+        actual_path = uploaded_file_1.name
         st.session_state.file_paths['actual'].append(actual_path)  
   
     if uploaded_file_2 is not None:  
-        estimated_path = uploaded_file_2
+        estimated_path = uploaded_file_2.name
         st.session_state.file_paths['estimated'].append(estimated_path)  
     print(st.session_state.file_paths)
     # Dropdown selector to select from previously uploaded files  
