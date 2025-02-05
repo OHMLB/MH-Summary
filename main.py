@@ -303,7 +303,7 @@ def main():
   
     if st.session_state.file_paths['actual'] and st.session_state.file_paths['estimated']:  
         # Read the uploaded file  
-        print(each_person(selected_actual_file))
+        #print(each_person(selected_actual_file))
         df_MH = substitute_task_num(selected_actual_file)   
         headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
         icons=['file-earmark-text-fill', 'clipboard-data','database-fill'], 
