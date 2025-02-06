@@ -325,7 +325,7 @@ def main():
         selected_estimated_file = os.path.join(UPLOAD_DIR, selected_estimated_file_name)  
   
     # If both actual and estimated files are selected, perform further analysis  
-    if actual_files and estimated_files:  
+    if actual_files and estimated_files: 
         df_MH = substitute_task_num(selected_actual_file)   
         headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
         icons=['file-earmark-text-fill', 'clipboard-data','database-fill'], 
