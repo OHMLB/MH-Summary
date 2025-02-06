@@ -312,7 +312,7 @@ def main():
     saved_files = get_saved_files()  
       
     # Separate actual and estimated files  
-    actual_files = [f for f in saved_files if "actual" in f.lower()]  
+    actual_files = [f for f in saved_files if "summary" in f.lower()]  
     estimated_files = [f for f in saved_files if "estimated" in f.lower()]  
   
     # Dropdown selector to select from previously uploaded files  
