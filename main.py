@@ -301,12 +301,9 @@ def main():
       
     # Save uploaded files  
     if uploaded_file_1 is not None:  
-        actual_path = save_uploaded_file(uploaded_file_1)  
-        st.success(f"Actual MH file saved: {actual_path}")  
-      
+        actual_path = save_uploaded_file(uploaded_file_1)   
     if uploaded_file_2 is not None:  
-        estimated_path = save_uploaded_file(uploaded_file_2)  
-        st.success(f"Estimated MH file saved: {estimated_path}")  
+        estimated_path = save_uploaded_file(uploaded_file_2) 
   
     # Get saved files  
     saved_files = get_saved_files()  
