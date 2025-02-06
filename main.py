@@ -272,57 +272,60 @@ def each_person(path,req):
 
     return df_each_person, fig
     
+# Directory to save uploaded files  
+UPLOAD_DIR = "uploaded_files"  
+  
+# Ensure the upload directory exists  
+if not os.path.exists(UPLOAD_DIR):  
+    os.makedirs(UPLOAD_DIR)  
+  
+def save_uploaded_file(uploaded_file):  
+    file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)  
+    with open(file_path, "wb") as f:  
+        f.write(uploaded_file.getbuffer())  
+    return file_path  
+  
+def get_saved_files():  
+    return os.listdir(UPLOAD_DIR)  
+  
 def main():  
     # Set the title of the Streamlit app  
     st.title("Man-Hours Analysis")  
-  
+      
     # Add a sidebar for file upload and requirement selection  
     st.sidebar.header("Upload and Select Options")  
-  
+      
     # File uploader to upload the Excel files  
     uploaded_file_1 = st.sidebar.file_uploader("Choose an Actual MH file", type="xlsx")  
     uploaded_file_2 = st.sidebar.file_uploader("Choose an Estimated MH file", type="xlsx")  
-  
-    # Initialize session state for storing file paths if not already done  
-    if 'file_paths' not in st.session_state:  
-        st.session_state.file_paths = {'actual': [], 'estimated': []}  
-
-    if 'file_names' not in st.session_state:
-        st.session_state.file_names = {'actual': [], 'estimated': []}
-  
-    # Store file paths in session state  
+      
+    # Save uploaded files  
     if uploaded_file_1 is not None:  
-        actual_path = uploaded_file_1
-        st.session_state.file_paths['actual'].append(actual_path)
-        st.session_state.file_names['actual'].append(actual_path.name)
-  
+        actual_path = save_uploaded_file(uploaded_file_1)  
+        st.success(f"Actual MH file saved: {actual_path}")  
+      
     if uploaded_file_2 is not None:  
-        estimated_path = uploaded_file_2
-        st.session_state.file_paths['estimated'].append(estimated_path) 
-        st.session_state.file_names['estimated'].append(estimated_path.name)
-
-    actual_file_mapping = {file.name: file for file in st.session_state.file_paths['actual']}  
-    estimated_file_mapping = {file.name: file for file in st.session_state.file_paths['estimated']}  
-
+        estimated_path = save_uploaded_file(uploaded_file_2)  
+        st.success(f"Estimated MH file saved: {estimated_path}")  
+  
+    # Get saved files  
+    saved_files = get_saved_files()  
+      
+    # Separate actual and estimated files  
+    actual_files = [f for f in saved_files if "actual" in f.lower()]  
+    estimated_files = [f for f in saved_files if "estimated" in f.lower()]  
+  
     # Dropdown selector to select from previously uploaded files  
-    if st.session_state.file_paths['actual']:
-        selected_actual_file_name = st.sidebar.selectbox("Select an Actual MH file from previous uploads",  
-                                                    st.session_state.file_names['actual'])
-        selected_actual_file = actual_file_mapping[selected_actual_file_name]  
-
-    if st.session_state.file_paths['estimated']:  
-        selected_estimated_file_name = st.sidebar.selectbox("Select an Estimated MH file from previous uploads",  
-                                                       st.session_state.file_names['estimated'])
-        selected_estimated_file = estimated_file_mapping[selected_estimated_file_name]
+    if actual_files:  
+        selected_actual_file_name = st.sidebar.selectbox("Select an Actual MH file from previous uploads", actual_files)  
+        selected_actual_file = os.path.join(UPLOAD_DIR, selected_actual_file_name)    
+      
+    if estimated_files:  
+        selected_estimated_file_name = st.sidebar.selectbox("Select an Estimated MH file from previous uploads", estimated_files)  
+        selected_estimated_file = os.path.join(UPLOAD_DIR, selected_estimated_file_name)  
   
-    if st.session_state.file_paths['actual'] != [] or st.session_state.file_paths['estimated'] != []:
-        while not st.session_state.file_paths['actual'] and not st.session_state.file_paths['estimated']:  
-            st.write("Waiting for files to be uploaded...")  
-            time.sleep(1)  # Wait for 1 second before checking again
-    else:
-        None 
-  
-    if st.session_state.file_paths['actual'] and st.session_state.file_paths['estimated']:  
+    # If both actual and estimated files are selected, perform further analysis  
+    if actual_files and estimated_files:  
         df_MH = substitute_task_num(selected_actual_file)   
         headerbar = option_menu(None, ["Overall", "Requirement","Database"], 
         icons=['file-earmark-text-fill', 'clipboard-data','database-fill'], 
