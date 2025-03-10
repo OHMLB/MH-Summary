@@ -33,6 +33,7 @@ def substitute_task_num(path):
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Detail Design', '2. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Implementation', '3. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Software Test', '4. '))
+    df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Documentation', '5. '))
     return df_MH
 
 def MH_for_each_req(df_MH,req):
@@ -44,7 +45,7 @@ def MH_for_all_req(df_MH, req_list):
     df_MH = df_MH[df_MH['header'].isin(req_list)]
     df_MH.reset_index(drop=True, inplace=True)
     df_MH['task name'] = df_MH['task name'].fillna('')
-    task_list = ['Software Requirement', 'Detail Design', 'Implementation', 'Software Test']
+    task_list = ['Software Requirement', 'Detail Design', 'Implementation', 'Software Test','Documentation']
     task_MH = []
     phase_list = []
     for task in task_list :
@@ -359,7 +360,7 @@ def main():
             all_req_df["Estimated"] = all_estimated_mh(selected_estimated_file,req_list)[0]
             sum_actual = all_req_df["timeSpent"].sum()
             sum_estimated = all_req_df["Estimated"].sum()
-            total_row = pd.DataFrame({col: [value] for col, value in zip(all_req_df.columns.to_list(), ["S0101240201_H00A", "Total", sum_actual, sum_estimated])})
+            total_row = pd.DataFrame({col: [value] for col, value in zip(all_req_df.columns.to_list(), ["", "Total", sum_actual, sum_estimated])})
             print(total_row)
             new_all_req_df = pd.concat([all_req_df,total_row], ignore_index=True)
             all_req_style_df = new_all_req_df.style.apply(lambda row: highlight_cells(row,"Estimated","timeSpent"), axis=1)
