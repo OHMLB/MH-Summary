@@ -297,8 +297,8 @@ def main():
     st.sidebar.header("Upload and Select Options")  
       
     # File uploader to upload the Excel files  
-    uploaded_file_1 = st.sidebar.file_uploader("Choose an Actual MH file", type="xlsx", accept_multiple_files=True)  
-    uploaded_file_2 = st.sidebar.file_uploader("Choose an Estimated MH file", type="xlsx", accept_multiple_files=True)  
+    uploaded_file_1 = st.sidebar.file_uploader("Choose an Actual MH file", type="xlsx")  
+    uploaded_file_2 = st.sidebar.file_uploader("Choose an Estimated MH file", type="xlsx")  
       
     # Save uploaded files  
     if uploaded_file_1 is not None:  
