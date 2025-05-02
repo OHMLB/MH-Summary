@@ -538,6 +538,9 @@ def main():
                 fig_dif = mh_summary_plot(df_dif_mh["req_list"],df_dif_mh["total_dif"],df_dif_mh["total_est"],df_dif_mh['total_act'],"Different MH","Estimated MH","Actual MH")
                 st.plotly_chart(fig_dif, use_container_width=True)
                 st.write('')
+                summary_table = pd.DataFrame({"req_list":req_list, "total_est":total_est,"total_act": np.array(total_act), "total_dif":np.round(total_dif,2)})
+                st.dataframe(summary_table)
+                st.write('')
                 st.plotly_chart(each_p_fig, use_container_width=True)
 
             if sub_sidebar == "Details" :
