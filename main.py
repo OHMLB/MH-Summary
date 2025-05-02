@@ -539,7 +539,7 @@ def main():
                 st.plotly_chart(fig_dif, use_container_width=True)
                 st.write('')
                 summary_table = pd.DataFrame({"req_list":req_list, "total_est":total_est,"total_act": np.array(total_act), "total_dif":np.round(total_dif,2)})
-                st.dataframe(summary_table.sort_values(by="req_list"))
+                st.dataframe(summary_table.sort_values(by="total_dif"))
                 st.write('')
                 st.plotly_chart(each_p_fig, use_container_width=True)
 
