@@ -466,6 +466,8 @@ def main():
 
                 total_act = []
                 total_est = []
+                act_mh_dict = {}
+                est_mh_dict = {}
                 for each_req in req_list:
                     each_req_df = MH_for_each_req(df_mh_2, each_req)
                     mh_a = ManHoursAnalysis(each_req_df, estimated_df, each_req)
@@ -477,6 +479,8 @@ def main():
                     print(f"Total Estimated Amount {est_mh_total}")
                     total_act.append(act_mh_total)
                     total_est.append(est_mh_total)
+                    act_mh_dict[each_req] = np.sum(act_mh, axis=0)
+                    est_mh_dict[each_req] = est_mh
                 total_dif = np.array(total_est) - np.array(total_act)
                 abs_total_dif = abs(total_dif)
                 print(total_dif)
@@ -539,7 +543,27 @@ def main():
                 st.plotly_chart(fig_dif, use_container_width=True)
                 st.write('')
                 summary_table = pd.DataFrame({"req_list":req_list, "total_est":total_est,"total_act": np.array(total_act), "total_dif":np.round(total_dif,2)})
-                st.dataframe(summary_table.sort_values(by="total_dif"))
+                
+                #st.dataframe(summary_table.sort_values(by="total_dif"))
+                act_mh_df = pd.DataFrame(act_mh_dict)
+                task_mh = [" ".join(t.split(' ')[0:-1]) for t in task_mh]
+                act_mh_df['task'] = task_mh
+                act_mh_df = act_mh_df.set_index(['task'])
+                act_mh_df_transpose = act_mh_df.T
+                act_mh_df_transpose.loc[:,'Total'] = act_mh_df_transpose.sum(numeric_only=True, axis=1)
+                print(act_mh_df_transpose)
+                
+                task_mh_est = [" ".join(t.split(' ')[0:-1]) + " (Estimated)" for t in task_mh]
+                est_mh_df = pd.DataFrame(est_mh_dict)
+                est_mh_df['task'] = task_mh_est
+                est_mh_df = est_mh_df.set_index(['task'])
+                est_mh_df_transpose = est_mh_df.T
+                est_mh_df_transpose.loc[:,'Total (Estimated)'] = est_mh_df_transpose.sum(numeric_only=True, axis=1)
+                print(est_mh_df_transpose)
+
+                df_merge_mh = pd.merge(act_mh_df_transpose, est_mh_df_transpose, left_index=True, right_index=True)
+                st.dataframe(df_merge_mh)
+                print(df_merge_mh)
                 st.write('')
                 st.plotly_chart(each_p_fig, use_container_width=True)
 
