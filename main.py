@@ -540,7 +540,7 @@ def main():
                 print(df_dif_mh)
                 df_dif_mh = df_dif_mh.sort_values("total_dif", ascending=True, ignore_index=True)
                 fig_dif = mh_summary_plot(df_dif_mh["req_list"],df_dif_mh["total_dif"],df_dif_mh["total_est"],df_dif_mh['total_act'],"Different MH","Estimated MH","Actual MH")
-                st.plotly_chart(fig_dif, use_container_width=True)
+                #st.plotly_chart(fig_dif, use_container_width=True)
                 st.write('')
                 summary_table = pd.DataFrame({"req_list":req_list, "total_est":total_est,"total_act": np.array(total_act), "total_dif":np.round(total_dif,2)})
                 
@@ -562,7 +562,7 @@ def main():
                 print(est_mh_df_transpose)
 
                 df_merge_mh = pd.merge(act_mh_df_transpose, est_mh_df_transpose, left_index=True, right_index=True)
-                st.dataframe(df_merge_mh)
+                #st.dataframe(df_merge_mh)
                 print(df_merge_mh)
                 st.write('')
                 st.plotly_chart(each_p_fig, use_container_width=True)
