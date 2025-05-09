@@ -563,7 +563,7 @@ def main():
                 print(est_mh_df_transpose)
 
                 df_merge_mh = pd.merge(act_mh_df_transpose, est_mh_df_transpose, left_index=True, right_index=True)
-                st.dataframe(df_merge_mh)
+                st.dataframe(df_merge_mh.sort_values(by="task"))
                 print(df_merge_mh)
                 st.write('')
                 st.plotly_chart(each_p_fig, use_container_width=True)
