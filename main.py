@@ -546,8 +546,8 @@ def main():
                 
                 #st.dataframe(summary_table.sort_values(by="total_dif"))
                 act_mh_df = pd.DataFrame(act_mh_dict)
-                task_mh = [" ".join(t.split(' ')[0:-1]) for t in task_mh]
-                act_mh_df['task'] = task_mh
+                task_mh_act = [" ".join(t.split(' ')[0:-1]) for t in task_mh]
+                act_mh_df['task'] = task_mh_act
                 act_mh_df = act_mh_df.set_index(['task'])
                 act_mh_df_transpose = act_mh_df.T
                 act_mh_df_transpose.loc[:,'Total'] = act_mh_df_transpose.sum(numeric_only=True, axis=1)
