@@ -562,7 +562,7 @@ def main():
                 est_mh_df_transpose.loc[:,'Total (Estimated)'] = est_mh_df_transpose.sum(numeric_only=True, axis=1)
                 print(est_mh_df_transpose)
 
-                df_merge_mh = pd.merge(act_mh_df_transpose, est_mh_df_transpose, left_index=True, right_index=True)
+                df_merge_mh = pd.merge(est_mh_df_transpose, act_mh_df_transpose, left_index=True, right_index=True)
                 st.dataframe(df_merge_mh.sort_index())
                 print(df_merge_mh)
                 st.write('')
