@@ -471,6 +471,7 @@ def main():
                 for each_req in req_list:
                     each_req_df = MH_for_each_req(df_mh_2, each_req)
                     mh_a = ManHoursAnalysis(each_req_df, estimated_df, each_req)
+                    task_mh =mh_a.calculate_mh_array()[0]
                     act_mh = mh_a.calculate_mh_array()[4]
                     act_mh_total = round(np.sum(act_mh),2)
                     print(f"Total Actual Amount {act_mh_total}")
