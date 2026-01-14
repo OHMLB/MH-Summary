@@ -29,6 +29,7 @@ def prepend_number_if_contains(value, substring, number):
 def substitute_task_num(path):
     MH_summary = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     df_MH = pd.DataFrame(MH_summary)
+    df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, '実装案(Jisoan)', '0. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Software Requirement', '1. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Detail Design', '2. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Implementation', '3. '))
@@ -45,7 +46,7 @@ def MH_for_all_req(df_MH, req_list):
     df_MH = df_MH[df_MH['header'].isin(req_list)]
     df_MH.reset_index(drop=True, inplace=True)
     df_MH['task name'] = df_MH['task name'].fillna('')
-    task_list = ['Software Requirement', 'Detail Design', 'Implementation', 'Software Test','Documentation']
+    task_list = ['実装案(Jisoan)' ,'Software Requirement', 'Detail Design', 'Implementation', 'Software Test','Documentation']
     task_MH = []
     phase_list = []
     for task in task_list :
@@ -676,3 +677,4 @@ def main():
         st.subheader("Please choose the estimated and actual in same phase")
 if __name__ == "__main__":  
     main()  
+
