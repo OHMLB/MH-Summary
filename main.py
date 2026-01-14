@@ -50,7 +50,7 @@ def MH_for_all_req(df_MH, req_list):
     task_MH = []
     phase_list = []
     for task in task_list :
-        MH = df_MH[df_MH["task name"].str.contains(task)]['timeSpent'].sum()
+        MH = df_MH[df_MH["task name"].str.contains(task, regex=False)]['timeSpent'].sum()
         phase_list.append(df_MH.loc[0,"phase"])
         task_MH.append(float(MH))
     df_task_MH = pd.DataFrame({"phase":phase_list,"task name":task_list,"timeSpent":task_MH})
@@ -677,4 +677,5 @@ def main():
         st.subheader("Please choose the estimated and actual in same phase")
 if __name__ == "__main__":  
     main()  
+
 
