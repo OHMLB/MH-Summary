@@ -101,7 +101,9 @@ class ManHoursAnalysis:
         for i in range(self.len_username):  
             for j in range(self.len_task_name):  
                 time_spent = self.req_df[(self.req_df["username"] == self.username[i]) &   
-                                         (self.req_df["task name"] == self.task_name[j])]['timeSpent'].sum()  
+                                         (self.req_df["task name"].str.contains(self.task_name[j].split(" ")[0], regex=False)) &
+                                         (self.req_df["task name"].str.contains(self.task_name[j].split(" ")[-1], regex=False))
+                                         ]['timeSpent'].sum()  
                 self.actual_mh_array[i, j] = round(time_spent,2)
 
         print(f"Actual MH Array \n {self.actual_mh_array}")  
@@ -677,5 +679,6 @@ def main():
         st.subheader("Please choose the estimated and actual in same phase")
 if __name__ == "__main__":  
     main()  
+
 
 
