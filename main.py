@@ -19,6 +19,17 @@ def all_estimated_mh(path, req):
         estimated_mh_array[i] = df_estimated[df_estimated['task name']==task_estimated[i]]['Estimated'].sum()
     return estimated_mh_array, df_estimated
 
+def normalize_jisoan(value):  
+    if pd.isna(value):  
+        return value  
+      
+    if isinstance(value, str) and '実装案(Jisoan)' in value:  
+        value_split = value.split()  
+        if len(value_split) >= 2:  
+            return value_split[0] + " " + value_split[1]  
+      
+    return value  
+
 def prepend_number_if_contains(value, substring, number):  
     if pd.isna(value):  # Handle NaN values if they exist  
         return value  
@@ -29,6 +40,7 @@ def prepend_number_if_contains(value, substring, number):
 def substitute_task_num(path):
     MH_summary = pd.read_excel(path, sheet_name='Sheet1', engine='openpyxl')
     df_MH = pd.DataFrame(MH_summary)
+    df_MH['task name'] = df_MH['task name'].apply(lambda x: normalize_jisoan(x))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, '実装案(Jisoan)', '0. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Software Requirement', '1. '))
     df_MH['task name'] = df_MH['task name'].apply(lambda x: prepend_number_if_contains(x, 'Detail Design', '2. '))
