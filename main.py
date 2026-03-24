@@ -658,6 +658,7 @@ def main():
 
                     for task_sel in multi_select:
                         st.write(f"Data Table of {task_sel} task")
+                        print(req_df["task name"], task_sel, req_df["task name"] == task_sel)
                         task_df,categry,name = mh_for_each_task(req_df[req_df["task name"] == task_sel])
                         #st.dataframe(req_df[req_df["task name"] == task_sel])
                         st.dataframe(task_df)
