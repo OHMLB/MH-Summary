@@ -26,7 +26,7 @@ def normalize_jisoan(value):
     if isinstance(value, str) and '実装案(Jisoan)' in value:  
         value_split = value.split()  
         if len(value_split) >= 2:  
-            return value_split[0] + " " + value_split[1]  
+            return value_split[0] + " " + value_split[-1]  
       
     return value  
 
